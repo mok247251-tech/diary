@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Diary</title>
+
+<style>
+body {
+    margin: 0;
+    background: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 상단 이미지 */
+.top-image img {
+    width: 500px;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+}
+
+/* 하단 이미지 */
+.bottom-image img {
+    width: 500px;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+}
+
+/* 네비게이션 */
+nav {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #000;
+}
+
+button {
+    padding: 6px 12px;
+    background: #000;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+button:active {
+    background: blue;
+}
+
+/* 달력 */
+.calendar {
+    width: 100%;
+    max-width: 500px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    padding: 10px 0;
+}
+
+.day-name {
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.day {
+    border: 1px solid #000;
+    min-height: 60px;
+    padding: 5px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.day:hover {
+    background: #f2f2f2;
+}
+
+/* 오늘 날짜 */
+.today {
+    border: 2px solid red !important;
+}
+
+/* 메모창 */
+#memoBox {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 500px;
+    background: #fff;
+    border-top: 1px solid #000;
+    padding: 15px;
+    display: none;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    border: 1px solid #000;
+    resize: none;
+}
+
+.saveBtn {
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+    <!-- 상단 이미지 -->
+    <div class="top-image">
+        <img src="https://i.ibb.co/3mcD95dV/kk.jpg" alt="top image">
+    </div>
+
+    <!-- 네비게이션 -->
+    <nav>
+        <button onclick="prevMonth()">◀</button>
+        <div id="monthTitle"></div>
+        <button onclick="nextMonth()">▶</button>
+    </nav>
+
+    <!-- 달력 -->
+	<div class="calendar" id="calendar"></div>
+
+<!-- 메모창 -->
+<div id="memoBox">
+    <h3 id="selectedDate"></h3>
+    <textarea id="memoText"></textarea>
+    <button class="saveBtn" onclick="saveMemo()">저장</button>
+    <button onclick="closeMemo()">닫기</button>
+</div>
+
+<script>
+const year = 2026;
+let currentMonth = new Date().getMonth();
+let selectedKey = "";
+
+const today = new Date();
+const todayYear = today.getFullYear();
+const todayMonth = today.getMonth();
+const todayDate = today.getDate();
+
+const monthNames = [
+"1월","2월","3월","4월","5월","6월",
+"7월","8월","9월","10월","11월","12월"
+];
+
+function renderCalendar() {
+    const calendar = document.getElementById("calendar");
+    calendar.innerHTML = "";
+
+    document.getElementById("monthTitle").innerText =
+        year + "년 " + monthNames[currentMonth];
+
+    const firstDay = new Date(year, currentMonth, 1).getDay();
+    const lastDate = new Date(year, currentMonth + 1, 0).getDate();
+
+    const dayNames = ["일","월","화","수","목","금","토"];
+    dayNames.forEach(d => {
+        const div = document.createElement("div");
+        div.className = "day-name";
+        div.innerText = d;
+        calendar.appendChild(div);
+    });
+
+    for(let i=0; i<firstDay; i++){
+        calendar.appendChild(document.createElement("div"));
+    }
+
+    for(let day=1; day<=lastDate; day++){
+        const div = document.createElement("div");
+        div.className = "day";
+        div.innerText = day;
+
+        if(year === todayYear &&
+           currentMonth === todayMonth &&
+           day === todayDate){
+            div.classList.add("today");
+        }
+
+        div.onclick = () => openMemo(day);
+        calendar.appendChild(div);
+    }
+}
+
+function prevMonth(){
+    if(currentMonth > 0){
+        currentMonth--;
+        renderCalendar();
+    }
+}
+
+function nextMonth(){
+    if(currentMonth < 11){
+        currentMonth++;
+        renderCalendar();
+    }
+}
+
+function openMemo(day){
+    selectedKey = year + "-" + (currentMonth+1) + "-" + day;
+    document.getElementById("memoBox").style.display = "block";
+    document.getElementById("selectedDate").innerText = selectedKey;
+
+    document.getElementById("memoText").value =
+        localStorage.getItem(selectedKey) || "";
+}
+
+function saveMemo(){
+    const text = document.getElementById("memoText").value;
+    localStorage.setItem(selectedKey, text);
+
+    const btn = document.querySelector(".saveBtn");
+    btn.style.background = "blue";
+    setTimeout(()=>btn.style.background = "black",500);
+
+    alert("저장되었습니다.");
+}
+
+function closeMemo(){
+    document.getElementById("memoBox").style.display = "none";
+}
+
+renderCalendar();
+</script>
+
+</body>
+</html>
